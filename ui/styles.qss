@@ -1,0 +1,83 @@
+/* Global Reset */
+QWidget {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    font-family: "Segoe UI", "Roboto", sans-serif;
+    font-size: 14px;
+}
+
+/* Titles and Labels */
+QLabel {
+    color: #bac2de;
+}
+
+#StatusLabel {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background-color: #313244;
+    color: #a6e3a1; /* Green default */
+}
+
+#StatusLabel[state="WARNING"] {
+    color: #f9e2af; /* Yellow */
+    border: 1px solid #f9e2af;
+}
+
+#StatusLabel[state="LOCK"] {
+    color: #f38ba8; /* Red */
+    background-color: #45475a;
+    border: 1px solid #f38ba8;
+}
+
+#StatusLabel[state="GRACE"] {
+    color: #89b4fa; /* Blue */
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+QPushButton:hover {
+    background-color: #45475a;
+    border-color: #585b70;
+}
+
+QPushButton:pressed {
+    background-color: #181825;
+    border-color: #89b4fa; /* Accent blue */
+}
+
+/* Specific Buttons */
+QPushButton#EnrollButton {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+QPushButton#EnrollButton:hover {
+    background-color: #b4befe;
+}
+
+/* Lists */
+QListWidget {
+    background-color: #181825;
+    border: 1px solid #313244;
+    border-radius: 6px;
+    padding: 5px;
+}
+
+QListWidget::item {
+    padding: 5px;
+    border-radius: 4px;
+}
+
+QListWidget::item:selected {
+    background-color: #45475a;
+    color: #ffffff;
+}

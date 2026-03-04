@@ -1,0 +1,9 @@
+{
+    "timeout_seconds": 5,
+    "warning_time_seconds": 3,
+    "lock_on_unauthorized": true,
+    "camera_index": 0,
+    "debug_mode": false,
+    "confidence_threshold": 0.5,
+    "model_path": "data/faces/encodings.pkl"
+}
