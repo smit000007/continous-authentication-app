@@ -14,6 +14,7 @@ from vision.face_recognizer import FaceRecognizer
 from system.lock_screen import SystemLocker
 from utils.logger import logger
 from core.vision_worker import VisionProcess
+from core.intruder_logger import IntruderLogger
 
 # Background Thread for Heavy Vision Processing
 # Helper thread to pull results from Queue back to Main Thread
@@ -51,6 +52,7 @@ class MainWindow(QMainWindow):
         self.face_recognizer = FaceRecognizer()
         self.monitor = PresenceMonitor()
         self.locker = SystemLocker()
+        self.intruder_logger = IntruderLogger()
         
         # State
         self.cached_faces = [] # Store last known faces for drawing
@@ -98,6 +100,7 @@ class MainWindow(QMainWindow):
         self.events.status_changed.connect(self.update_status)
         self.events.lock_requested.connect(self.locker.lock_workstation)
         self.events.warning_requested.connect(self.show_warning)
+        self.events.intruder_detected.connect(self.handle_intruder)
         
         # Start Camera (Internal thread triggers)
         self.camera.start()
@@ -167,23 +170,25 @@ class MainWindow(QMainWindow):
         # Could show a dialog or flash the screen
         self.footer_label.setText(f"WARNING: {reason}")
     
-
+    @pyqtSlot(str)
+    def handle_intruder(self, reason):
+        """Called when PresenceMonitor confirms an intruder before locking."""
+        logger.error(f"MainWindow received intruder signal! Reason: {reason}")
+        frame = self.camera.get_frame()
+        self.intruder_logger.log_intruder(frame, reason)
 
     def open_registration(self):
-        # Stop sending frames? No, just let it run.
-        # But for registration, we might want to pause recognition to save CPU?
-        # Actually, separate process handles it fine.
+        # Pause monitoring so the system doesn't lock while an unauthorized person is registering
+        self.monitor.is_paused = True
         
         reg_win = RegistrationWindow(self.face_recognizer, self)
         reg_win.exec()
+        
+        self.monitor.is_paused = False
+        self.monitor.cooldown_until = __import__('time').time() + self.monitor.grace_period_seconds # Reset grace period
 
     def open_face_manager(self):
-        # Pause process?
-        # Just open dialog. Use main thread recognizer for DB ops.
-        # Note: FaceRecognizer logic is duplicated in process, but DB (pickle) is shared on disk.
-        # We should be careful about writing while reading.
-        # Simple fix: The process reads-only. Manager writes.
-        # We might need to restart process to reload faces?
+        self.monitor.is_paused = True
         
         manager = FaceManagerDialog(self.face_recognizer, self)
         manager.exec()
@@ -191,6 +196,9 @@ class MainWindow(QMainWindow):
         # Signal process to reload? It reloads on init.
         # Let's restart the process to be safe and load new faces
         self.restart_vision_process()
+        
+        self.monitor.is_paused = False
+        self.monitor.cooldown_until = __import__('time').time() + self.monitor.grace_period_seconds # Reset grace period
 
     def restart_vision_process(self):
         if self.vision_process.is_alive():
@@ -210,4 +218,5 @@ class MainWindow(QMainWindow):
             self.vision_process.terminate()
             self.vision_process.join()
         self.camera.stop()
+        self.intruder_logger.stop()
         event.accept()

@@ -27,7 +27,8 @@ class SystemLocker:
             return
 
         try:
-            logger.warning("Locking Workstation...")
+            logger.warning("Locking Workstation... pausing briefly to finalize logs.")
+            __import__("time").sleep(0.5) # Give IntruderLogger Thread time to write to disk
             ctypes.windll.user32.LockWorkStation()
         except Exception as e:
             logger.error(f"Failed to lock workstation: {e}")

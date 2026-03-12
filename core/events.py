@@ -16,6 +16,7 @@ class EventManager(QObject):
     lock_requested = pyqtSignal()
     warning_requested = pyqtSignal(str) # reason
     warning_cleared = pyqtSignal()
+    intruder_detected = pyqtSignal(str) # reason
     
     # Registration Events
     registration_success = pyqtSignal(str) # Name
